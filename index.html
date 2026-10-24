@@ -24,29 +24,29 @@
   </div>
 
   <model-viewer
-    id="aircraftViewer"
-    src="assets/aircraft_chrome.glb"
-    skybox-image="assets/dtla_skybox.hdr"
-    environment-image="assets/dtla_skybox.hdr"
-    alt="Chrome Aircraft Skull Sculpture"
-    auto-rotate
-    auto-rotate-delay="1000"
-    rotation-per-second="15deg"
-    camera-controls
-    touch-action="pan-y"
-    camera-orbit="45deg 75deg 1.2m"
-    min-camera-orbit="auto auto 0.4m"
-    max-camera-orbit="auto auto 3.0m"
-    exposure="1.0"
-    shadow-intensity="1.2"
-    shadow-softness="0.8"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    ar-scale="auto"
-    ar-placement="floor"
-  >
-    <button slot="ar-button" id="nativeArBtn" style="display: none;"></button>
-  </model-viewer>
+  id="aircraftViewer"
+  src="https://bmehr.github.io/ThePlane/assets/aircraft_chrome.glb"
+  skybox-image="https://bmehr.github.io/ThePlane/assets/dtla_skybox.hdr"
+  environment-image="https://bmehr.github.io/ThePlane/assets/dtla_skybox.hdr"
+  alt="Chrome Aircraft Sculpture"
+  auto-rotate
+  auto-rotate-delay="1000"
+  rotation-per-second="14deg"
+  camera-controls
+  touch-action="pan-y"
+  camera-orbit="35deg 82deg 1.3m"
+  min-camera-orbit="auto auto 0.5m"
+  max-camera-orbit="auto auto 3.0m"
+  shadow-intensity="0"
+  shadow-softness="1.0"
+  exposure="1.0"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-scale="auto"
+  ar-placement="floor"
+>
+  <button slot="ar-button" id="nativeArBtn" style="display: none;"></button>
+</model-viewer>
 
   <nav class="controls-bar">
     <button class="btn btn-shutter" id="shutterBtn" aria-label="Take Snapshot">
