@@ -1,7 +1,5 @@
 const viewer = document.getElementById('aircraftViewer');
 const shutterBtn = document.getElementById('shutterBtn');
-const customArBtn = document.getElementById('customArBtn');
-const nativeArBtn = document.getElementById('nativeArBtn');
 const flash = document.getElementById('flash');
 const progressBar = document.getElementById('progressBar');
 const progressFill = document.getElementById('progressFill');
@@ -19,25 +17,7 @@ viewer.addEventListener('progress', (event) => {
   }
 });
 
-// 2. Custom AR Launch Trigger with Safe Handoff
-if (customArBtn) {
-  customArBtn.addEventListener('click', async () => {
-    try {
-      if (typeof viewer.activateAR === 'function') {
-        await viewer.activateAR();
-      } else if (nativeArBtn) {
-        nativeArBtn.click();
-      }
-    } catch (err) {
-      console.warn('activateAR() direct call failed, attempting fallback click:', err);
-      if (nativeArBtn) {
-        nativeArBtn.click();
-      }
-    }
-  });
-}
-
-// 3. Viewport Screenshot Capture
+// 2. High-Res Viewport Snapshot Capture
 if (shutterBtn) {
   shutterBtn.addEventListener('click', async () => {
     if (flash) {
