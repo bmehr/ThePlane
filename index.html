@@ -25,9 +25,9 @@
 
   <model-viewer
   id="aircraftViewer"
-  src="https://bmehr.github.io/ThePlane/assets/aircraft_chrome.glb"
-  skybox-image="https://bmehr.github.io/ThePlane/assets/dtla_skybox.hdr"
-  environment-image="https://bmehr.github.io/ThePlane/assets/dtla_skybox.hdr"
+  src="assets/aircraft_chrome.glb"
+  skybox-image="assets/dtla_skybox.hdr"
+  environment-image="assets/dtla_skybox.hdr"
   alt="Chrome Aircraft Sculpture"
   auto-rotate
   auto-rotate-delay="1000"
@@ -37,15 +37,21 @@
   camera-orbit="35deg 82deg 1.3m"
   min-camera-orbit="auto auto 0.5m"
   max-camera-orbit="auto auto 3.0m"
-  shadow-intensity="0"
+  shadow-intensity="0.2"
   shadow-softness="1.0"
   exposure="1.0"
   ar
-  ar-modes="webxr scene-viewer quick-look"
+  ar-modes="scene-viewer quick-look webxr"
   ar-scale="auto"
   ar-placement="floor"
 >
+  <!-- Native AR trigger slot required by model-viewer -->
   <button slot="ar-button" id="nativeArBtn" style="display: none;"></button>
+
+  <!-- Surface Tracking & Prompt Hint for Mobile AR -->
+  <div id="arPrompt" slot="ar-prompt">
+    <div class="ar-scanning-pill">Move phone slowly to detect floor or table</div>
+  </div>
 </model-viewer>
 
   <nav class="controls-bar">
