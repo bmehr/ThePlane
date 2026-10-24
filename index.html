@@ -24,35 +24,36 @@
   </div>
 
   <model-viewer
-  id="aircraftViewer"
-  src="assets/aircraft_chrome.glb"
-  skybox-image="assets/dtla_skybox.hdr"
-  environment-image="assets/dtla_skybox.hdr"
-  alt="Chrome Aircraft Sculpture"
-  auto-rotate
-  auto-rotate-delay="1000"
-  rotation-per-second="14deg"
-  camera-controls
-  touch-action="pan-y"
-  camera-orbit="35deg 82deg 1.3m"
-  min-camera-orbit="auto auto 0.5m"
-  max-camera-orbit="auto auto 3.0m"
-  shadow-intensity="0.2"
-  shadow-softness="1.0"
-  exposure="1.0"
-  ar
-  ar-modes="scene-viewer quick-look webxr"
-  ar-scale="auto"
-  ar-placement="floor"
->
-  <!-- Native AR trigger slot required by model-viewer -->
-  <button slot="ar-button" id="nativeArBtn" style="display: none;"></button>
+    id="aircraftViewer"
+    src="assets/aircraft_chrome.glb"
+    ios-src="assets/aircraft_chrome.usdz"
+    skybox-image="assets/dtla_skybox.hdr"
+    environment-image="assets/dtla_skybox.hdr"
+    alt="Chrome Aircraft Sculpture"
+    auto-rotate
+    auto-rotate-delay="1000"
+    rotation-per-second="14deg"
+    camera-controls
+    touch-action="pan-y"
+    camera-orbit="35deg 82deg 1.3m"
+    min-camera-orbit="auto auto 0.5m"
+    max-camera-orbit="auto auto 3.0m"
+    shadow-intensity="0.2"
+    shadow-softness="1.0"
+    exposure="1.0"
+    ar
+    ar-modes="quick-look scene-viewer webxr"
+    ar-scale="auto"
+    ar-placement="floor"
+  >
+    <!-- Accessible, valid AR slot button (no display:none) -->
+    <button slot="ar-button" id="nativeArBtn" class="visually-hidden"></button>
 
-  <!-- Surface Tracking & Prompt Hint for Mobile AR -->
-  <div id="arPrompt" slot="ar-prompt">
-    <div class="ar-scanning-pill">Move phone slowly to detect floor or table</div>
-  </div>
-</model-viewer>
+    <!-- Surface Tracking & Prompt Hint for Mobile AR -->
+    <div id="arPrompt" slot="ar-prompt">
+      <div class="ar-scanning-pill">Move phone slowly to detect floor or table</div>
+    </div>
+  </model-viewer>
 
   <nav class="controls-bar">
     <button class="btn btn-shutter" id="shutterBtn" aria-label="Take Snapshot">

@@ -19,13 +19,20 @@ viewer.addEventListener('progress', (event) => {
   }
 });
 
-// 2. Custom AR Launch Trigger
+// 2. Custom AR Launch Trigger with Safe Handoff
 if (customArBtn) {
-  customArBtn.addEventListener('click', () => {
-    if (viewer.canActivateAR) {
-      viewer.activateAR();
-    } else if (nativeArBtn) {
-      nativeArBtn.click();
+  customArBtn.addEventListener('click', async () => {
+    try {
+      if (typeof viewer.activateAR === 'function') {
+        await viewer.activateAR();
+      } else if (nativeArBtn) {
+        nativeArBtn.click();
+      }
+    } catch (err) {
+      console.warn('activateAR() direct call failed, attempting fallback click:', err);
+      if (nativeArBtn) {
+        nativeArBtn.click();
+      }
     }
   });
 }
