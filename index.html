@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>LA Exhibit: Chrome Aircraft AR</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google model-viewer library -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</head>
+<body>
+
+  <div class="flash-overlay" id="flash"></div>
+
+  <header class="header">
+    <h1>Chrome Winged Relic</h1>
+    <p>Downtown Los Angeles Exhibit</p>
+  </header>
+
+  <div class="gesture-hint">Drag to rotate • Pinch to zoom</div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="fill" id="progressFill"></div>
+  </div>
+
+  <model-viewer
+    id="aircraftViewer"
+    src="assets/aircraft_chrome.glb"
+    skybox-image="assets/dtla_skybox.hdr"
+    environment-image="assets/dtla_skybox.hdr"
+    alt="Chrome Aircraft Skull Sculpture"
+    auto-rotate
+    auto-rotate-delay="1000"
+    rotation-per-second="15deg"
+    camera-controls
+    touch-action="pan-y"
+    camera-orbit="45deg 75deg 1.2m"
+    min-camera-orbit="auto auto 0.4m"
+    max-camera-orbit="auto auto 3.0m"
+    exposure="1.0"
+    shadow-intensity="1.2"
+    shadow-softness="0.8"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-scale="auto"
+    ar-placement="floor"
+  >
+    <button slot="ar-button" id="nativeArBtn" style="display: none;"></button>
+  </model-viewer>
+
+  <nav class="controls-bar">
+    <button class="btn btn-shutter" id="shutterBtn" aria-label="Take Snapshot">
+      <svg viewBox="0 0 24 24">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      Snap
+    </button>
+    <button class="btn btn-ar" id="customArBtn">
+      View in Space (AR)
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
