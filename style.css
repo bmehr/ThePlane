@@ -27,6 +27,20 @@ model-viewer {
   outline: none;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .header {
   position: absolute;
   top: 1.5rem;
@@ -56,10 +70,11 @@ model-viewer {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  justify-content: center;
+  gap: 0.85rem;
   z-index: 10;
   width: calc(100% - 3rem);
-  max-width: 320px;
+  max-width: 420px;
+  justify-content: center;
 }
 
 .btn {
@@ -67,7 +82,7 @@ model-viewer {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.6rem;
+  padding: 0.85rem 1.4rem;
   border-radius: 9999px;
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
@@ -80,7 +95,6 @@ model-viewer {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
   user-select: none;
-  width: 100%;
 }
 
 .btn:hover {
@@ -89,6 +103,17 @@ model-viewer {
 
 .btn:active {
   transform: scale(0.96);
+}
+
+.btn-ar {
+  flex: 2;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(112, 0, 255, 0.3));
+  border: 1px solid var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.btn-shutter {
+  flex: 1;
 }
 
 .btn-shutter svg {
@@ -147,4 +172,28 @@ model-viewer {
 
 .progress-bar.hide {
   display: none;
+}
+
+/* AR Surface Prompt */
+#arPrompt {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  display: none;
+}
+
+model-viewer[ar-status="session-started"] #arPrompt {
+  display: block;
+}
+
+.ar-scanning-pill {
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  backdrop-filter: blur(8px);
 }

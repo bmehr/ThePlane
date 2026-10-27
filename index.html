@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>LA Exhibit: Chrome Aircraft</title>
+  <title>LA Exhibit: Chrome Aircraft AR</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Google model-viewer library -->
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
+  <!-- Dynamic loader to resolve timing issues & upgrade to model-viewer v4.0.0 -->
+  <script>
+    if (!customElements.get('model-viewer')) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+      document.head.appendChild(script);
+    }
+  </script>
 </head>
 <body>
 
@@ -26,6 +34,7 @@
   <model-viewer
     id="aircraftViewer"
     src="assets/aircraft_chrome.glb"
+    ios-src="assets/aircraft_chrome.usdz"
     skybox-image="assets/dtla_skybox.hdr"
     environment-image="assets/dtla_skybox.hdr"
     alt="Chrome Aircraft Sculpture"
@@ -40,7 +49,18 @@
     shadow-intensity="0.2"
     shadow-softness="1.0"
     exposure="1.0"
+    ar
+    ar-modes="quick-look scene-viewer webxr"
+    ar-scale="auto"
+    ar-placement="floor"
   >
+    <!-- Hidden native trigger button slot -->
+    <button slot="ar-button" id="nativeArBtn" class="visually-hidden"></button>
+
+    <!-- AR Surface Prompt -->
+    <div id="arPrompt" slot="ar-prompt">
+      <div class="ar-scanning-pill">Move phone slowly to detect floor or table</div>
+    </div>
   </model-viewer>
 
   <nav class="controls-bar">
@@ -49,7 +69,10 @@
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
         <circle cx="12" cy="13" r="4"></circle>
       </svg>
-      Capture View
+      Capture
+    </button>
+    <button class="btn btn-ar" id="customArBtn">
+      View in Space (AR)
     </button>
   </nav>
 
