@@ -1,7 +1,6 @@
 const modelViewer = document.getElementById('aircraftViewer');
 const arScene = document.getElementById('arScene');
 const arAircraft = document.getElementById('arAircraft');
-const arGroundPlane = document.getElementById('arGroundPlane');
 const arToggleBtn = document.getElementById('arToggleBtn');
 const shutterBtn = document.getElementById('shutterBtn');
 const statusHint = document.getElementById('statusHint');
@@ -22,37 +21,27 @@ if (modelViewer) {
   });
 }
 
-// 2. Hybrid Mode Switcher (Resolves GPU conflicts & black screen)
-if (arToggleBtn) {
+// 2. WebXR AR Session Trigger
+if (arToggleBtn && arScene) {
   arToggleBtn.addEventListener('click', async () => {
     if (!isARActive) {
       // --- SWITCH TO AR ---
       isARActive = true;
       arToggleBtn.textContent = 'Exit AR';
-      statusHint.textContent = 'Tap floor or table to place sculpture';
+      statusHint.textContent = 'Aim at floor or table to place sculpture';
 
-      // 1. Relieve mobile WebGL pressure: pause model-viewer rendering
+      // Pause exhibit viewer
       modelViewer.classList.add('exhibit-hidden');
       if (typeof modelViewer.pause === 'function') {
         modelViewer.pause();
       }
 
-      // 2. Reveal A-Frame scene with transparent background for camera passthrough
+      // Show A-Frame scene
       arScene.classList.remove('ar-hidden');
-      arAircraft.setAttribute('visible', 'false');
 
-      // 3. Ensure the underlying WebGL renderer is set to transparent
-      if (arScene.renderer) {
-        arScene.renderer.setClearColor(0x000000, 0);
-      }
-
-      // 4. Start 8th Wall tracking pipeline
-      if (window.XR8) {
-        if (typeof XR8.resume === 'function') {
-          XR8.resume();
-        } else if (typeof XR8.run === 'function') {
-          XR8.run({ canvas: arScene.renderer ? arScene.renderer.domElement : undefined });
-        }
+      // Request WebXR Immersive AR mode directly from browser
+      if (arScene.enterVR) {
+        arScene.enterVR();
       }
     } else {
       // --- EXIT AR MODE ---
@@ -60,37 +49,43 @@ if (arToggleBtn) {
       arToggleBtn.textContent = 'View in Space (AR)';
       statusHint.textContent = 'Drag to rotate • Pinch to zoom';
 
-      // Stop 8th Wall camera stream to free hardware resources
-      if (window.XR8 && typeof XR8.pause === 'function') {
-        XR8.pause();
+      if (arScene.exitVR) {
+        arScene.exitVR();
       }
 
       arScene.classList.add('ar-hidden');
 
-      // Unhide model-viewer and resume playback
+      // Unhide model-viewer
       modelViewer.classList.remove('exhibit-hidden');
       if (typeof modelViewer.play === 'function') {
         modelViewer.play();
       }
     }
   });
-}
 
-// 3. AR Surface Tap-to-Place
-if (arGroundPlane && arAircraft) {
-  arGroundPlane.addEventListener('click', (event) => {
-    if (!isARActive) return;
+  // Listen for AR session events
+  arScene.addEventListener('enter-vr', () => {
+    if (arScene.is('ar-mode')) {
+      statusHint.textContent = 'Scanning room... Move phone slowly';
+    }
+  });
 
-    const touchPoint = event.detail.intersection ? event.detail.intersection.point : null;
-    if (touchPoint) {
-      arAircraft.setAttribute('position', touchPoint);
-      arAircraft.setAttribute('visible', 'true');
-      statusHint.textContent = 'Pinch to scale • Twist two fingers to rotate';
+  arScene.addEventListener('exit-vr', () => {
+    if (isARActive) {
+      arToggleBtn.click(); // Reset state if user exits via Android back button
     }
   });
 }
 
-// 4. Viewport Screenshot Capture
+// 3. WebXR Hit-Test Placement Event
+if (arScene && arAircraft) {
+  arScene.addEventListener('ar-hit-test-select', () => {
+    arAircraft.setAttribute('visible', 'true');
+    statusHint.textContent = 'Object placed! Walk around to inspect';
+  });
+}
+
+// 4. Viewport Snapshot Capture
 if (shutterBtn) {
   shutterBtn.addEventListener('click', async () => {
     if (flash) {
