@@ -6,14 +6,13 @@
   <title>LA Exhibit: Chrome Aircraft</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Preload core 3D assets -->
   <link rel="preload" href="assets/dtla_skybox.hdr" as="fetch" type="image/vnd.radiance" crossorigin="anonymous">
   <link rel="preload" href="assets/aircraft_chrome.glb" as="fetch" type="model/gltf-binary" crossorigin="anonymous">
 
-  <!-- Exhibit Viewer Engine -->
+  <!-- Core exhibit engine -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 
-  <!-- A-Frame & 8th Wall Engine Core -->
+  <!-- A-Frame & 8th Wall Engine -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe-master.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@8thwall/web/dist/xrweb.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@8thwall/web/dist/xrextras.js"></script>
@@ -33,7 +32,7 @@
     <div class="fill" id="progressFill"></div>
   </div>
 
-  <!-- 1. FAST-BOOT 3D SKYBOX EXHIBIT (Active by default) -->
+  <!-- 1. 3D SKYBOX EXHIBIT -->
   <model-viewer
     id="aircraftViewer"
     src="assets/aircraft_chrome.glb"
@@ -56,11 +55,13 @@
   >
   </model-viewer>
 
-  <!-- 2. DEDICATED WEBAR SURFACE SCENE -->
+  <!-- 2. TRANSPARENT WEBAR CAMERA SCENE -->
   <a-scene
     id="arScene"
     class="ar-hidden"
-    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true;"
+    embedded
+    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true; alpha: true;"
+    xrweb="allowedDevices: any;"
   >
     <a-assets>
       <a-asset-item id="arModel" src="assets/aircraft_chrome.glb"></a-asset-item>
@@ -74,8 +75,8 @@
     >
     </a-camera>
 
-    <a-entity light="type: ambient; intensity: 0.8;"></a-entity>
-    <a-entity light="type: directional; intensity: 1.5;" position="2 4 2"></a-entity>
+    <a-entity light="type: ambient; intensity: 0.9;"></a-entity>
+    <a-entity light="type: directional; intensity: 1.6;" position="2 4 2"></a-entity>
 
     <a-entity
       id="arAircraft"

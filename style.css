@@ -15,7 +15,7 @@ body, html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #0b0c10;
+  background-color: transparent; /* Allows 8th Wall video feed to show through */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #ffffff;
 }
@@ -26,6 +26,7 @@ model-viewer {
   height: 100vh;
   display: block;
   outline: none;
+  background-color: #0b0c10;
 }
 
 /* AR Canvas */
@@ -35,7 +36,12 @@ a-scene {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 2;
+}
+
+/* 8th Wall Camera Feed Video Layer */
+video#camerafeed {
+  z-index: 0 !important;
 }
 
 /* Visibility State Toggles */

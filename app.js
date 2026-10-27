@@ -22,29 +22,37 @@ if (modelViewer) {
   });
 }
 
-// 2. Direct AR Toggle Handler
+// 2. Hybrid Mode Switcher (Resolves GPU conflicts & black screen)
 if (arToggleBtn) {
-  arToggleBtn.addEventListener('click', () => {
+  arToggleBtn.addEventListener('click', async () => {
     if (!isARActive) {
       // --- SWITCH TO AR ---
       isARActive = true;
       arToggleBtn.textContent = 'Exit AR';
       statusHint.textContent = 'Tap floor or table to place sculpture';
 
-      // Hide & pause model-viewer
+      // 1. Relieve mobile WebGL pressure: pause model-viewer rendering
       modelViewer.classList.add('exhibit-hidden');
-      modelViewer.removeAttribute('auto-rotate');
+      if (typeof modelViewer.pause === 'function') {
+        modelViewer.pause();
+      }
 
-      // Unhide A-Frame scene
+      // 2. Reveal A-Frame scene with transparent background for camera passthrough
       arScene.classList.remove('ar-hidden');
       arAircraft.setAttribute('visible', 'false');
 
-      // Start 8th Wall AR Engine
+      // 3. Ensure the underlying WebGL renderer is set to transparent
+      if (arScene.renderer) {
+        arScene.renderer.setClearColor(0x000000, 0);
+      }
+
+      // 4. Start 8th Wall tracking pipeline
       if (window.XR8) {
-        arScene.setAttribute('xrweb', 'allowedDevices: any;');
-      } else {
-        console.warn('XR8 not detected; starting default WebXR');
-        arScene.setAttribute('webxr', '');
+        if (typeof XR8.resume === 'function') {
+          XR8.resume();
+        } else if (typeof XR8.run === 'function') {
+          XR8.run({ canvas: arScene.renderer ? arScene.renderer.domElement : undefined });
+        }
       }
     } else {
       // --- EXIT AR MODE ---
@@ -52,16 +60,18 @@ if (arToggleBtn) {
       arToggleBtn.textContent = 'View in Space (AR)';
       statusHint.textContent = 'Drag to rotate • Pinch to zoom';
 
-      // Stop camera tracking and hide AR scene
-      if (window.XR8 && typeof XR8.stop === 'function') {
-        XR8.stop();
+      // Stop 8th Wall camera stream to free hardware resources
+      if (window.XR8 && typeof XR8.pause === 'function') {
+        XR8.pause();
       }
-      arScene.removeAttribute('xrweb');
+
       arScene.classList.add('ar-hidden');
 
-      // Unhide model-viewer and resume auto-rotation
+      // Unhide model-viewer and resume playback
       modelViewer.classList.remove('exhibit-hidden');
-      modelViewer.setAttribute('auto-rotate', '');
+      if (typeof modelViewer.play === 'function') {
+        modelViewer.play();
+      }
     }
   });
 }
