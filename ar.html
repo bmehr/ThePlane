@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>AR View: Chrome Aircraft</title>
 
-  <!-- Only A-Frame is loaded on this page -->
+  <!-- A-Frame Core -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe-master.min.js"></script>
 
   <style>
     :root {
       --accent-cyan: #00f0ff;
-      --bg-glass: rgba(18, 20, 26, 0.75);
-      --border-glass: rgba(255, 255, 255, 0.15);
+      --bg-glass: rgba(18, 20, 26, 0.85);
+      --border-glass: rgba(255, 255, 255, 0.2);
     }
 
     * {
@@ -22,11 +22,11 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body, html {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: transparent;
+      background: transparent !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: #ffffff;
     }
@@ -37,6 +37,27 @@
       position: absolute;
       top: 0;
       left: 0;
+      background: transparent !important;
+    }
+
+    /* On-Screen Mobile Debug Console */
+    #debugBox {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      right: 1rem;
+      max-height: 140px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #a0f0ff;
+      z-index: 9999;
+      pointer-events: auto;
+      word-break: break-all;
     }
 
     .controls-bar {
@@ -69,14 +90,18 @@
       cursor: pointer;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       text-decoration: none;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+      transition: transform 0.15s ease, border-color 0.2s ease;
       user-select: none;
       flex: 1;
     }
 
-    .btn-exit {
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(112, 0, 255, 0.3));
+    .btn-start {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(112, 0, 255, 0.4));
       border: 1px solid var(--accent-cyan);
+    }
+
+    .btn-exit {
+      background: var(--bg-glass);
     }
 
     .gesture-hint {
@@ -101,16 +126,19 @@
 </head>
 <body>
 
-  <div class="gesture-hint" id="statusHint">Move phone to scan floor, then tap to place</div>
+  <div id="debugBox">System ready. Tap "Start Camera AR".</div>
+
+  <div class="gesture-hint" id="statusHint">Ready to launch AR</div>
 
   <a-scene
     id="scene"
-    webxr="optionalFeatures: hit-test, local-floor;"
+    embedded
+    webxr="referenceSpaceType: local-floor; requiredFeatures: hit-test, local-floor;"
     ar-hit-test="target: #aircraftEntity; type: map;"
     renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true; alpha: true;"
     vr-mode-ui="enabled: false"
   >
-    <a-assets timeout="10000">
+    <a-assets timeout="12000">
       <a-asset-item id="aircraftModel" src="assets/aircraft_chrome.glb"></a-asset-item>
     </a-assets>
 
@@ -130,8 +158,11 @@
   </a-scene>
 
   <nav class="controls-bar">
+    <button class="btn btn-start" id="startArBtn">
+      Start Camera AR
+    </button>
     <a href="index.html" class="btn btn-exit">
-      Exit AR
+      Back
     </a>
   </nav>
 
@@ -139,21 +170,77 @@
     const scene = document.getElementById('scene');
     const aircraft = document.getElementById('aircraftEntity');
     const statusHint = document.getElementById('statusHint');
+    const startArBtn = document.getElementById('startArBtn');
+    const debugBox = document.getElementById('debugBox');
 
-    // Automatically request AR session on page load
-    scene.addEventListener('loaded', async () => {
-      try {
-        if (typeof scene.enterAR === 'function') {
-          await scene.enterAR();
-        }
-      } catch (err) {
-        console.warn('Auto enterAR failed; user interaction may be required:', err);
+    function log(msg) {
+      console.log(msg);
+      debugBox.innerHTML += `<br>• ${msg}`;
+      debugBox.scrollTop = debugBox.scrollHeight;
+    }
+
+    // Force transparent clear color on render initialization
+    scene.addEventListener('render-target-loaded', () => {
+      if (scene.renderer) {
+        scene.renderer.setClearColor(0x000000, 0);
+        log('WebGL renderer set to alpha transparent');
       }
     });
+
+    if (startArBtn && scene) {
+      startArBtn.addEventListener('click', async () => {
+        log('Button clicked. Checking hardware...');
+
+        try {
+          // 1. Explicit camera permission trigger
+          log('Requesting getUserMedia camera permission...');
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+          });
+          log('Camera permission GRANTED.');
+          // Stop stream immediately so ARCore can bind to the camera hardware
+          stream.getTracks().forEach(t => t.stop());
+
+          // 2. Validate WebXR support
+          if (!navigator.xr) {
+            throw new Error('navigator.xr is undefined. Use Android Chrome.');
+          }
+
+          const isSupported = await navigator.xr.isSessionSupported('immersive-ar');
+          log(`immersive-ar supported: ${isSupported}`);
+
+          if (!isSupported) {
+            throw new Error('Device/Browser reports immersive-ar unsupported. Ensure Google Play Services for AR is installed.');
+          }
+
+          log('Entering AR session...');
+          if (typeof scene.enterAR === 'function') {
+            await scene.enterAR();
+            startArBtn.style.display = 'none';
+            statusHint.textContent = 'Scanning room... Move phone slowly';
+            log('enterAR() executed successfully');
+          } else {
+            throw new Error('scene.enterAR is not a function on this A-Frame build');
+          }
+        } catch (err) {
+          log(`ERROR: ${err.name} - ${err.message}`);
+          statusHint.textContent = 'AR failed. See log box above.';
+        }
+      });
+    }
 
     scene.addEventListener('ar-hit-test-select', () => {
       aircraft.setAttribute('visible', 'true');
       statusHint.textContent = 'Sculpture placed! Walk around to inspect';
+      log('Hit-test placed object.');
+    });
+
+    scene.addEventListener('enter-vr', () => {
+      if (scene.is('ar-mode')) {
+        log('Session confirmed in AR mode.');
+      } else {
+        log('WARNING: Session entered standard VR mode, not AR.');
+      }
     });
   </script>
 </body>
