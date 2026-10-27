@@ -20,6 +20,7 @@ body, html {
   color: #ffffff;
 }
 
+/* 3D Exhibit Canvas */
 model-viewer {
   width: 100vw;
   height: 100vh;
@@ -27,18 +28,23 @@ model-viewer {
   outline: none;
 }
 
-.visually-hidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* AR Canvas */
+a-scene {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Visibility State Toggles */
+.exhibit-hidden {
+  display: none !important;
+}
+
+.ar-hidden {
+  display: none !important;
 }
 
 .header {
@@ -144,13 +150,15 @@ model-viewer {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.65);
-  background: rgba(0, 0, 0, 0.45);
-  padding: 0.3rem 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.35rem 0.9rem;
   border-radius: 20px;
   pointer-events: none;
   letter-spacing: 0.03em;
   backdrop-filter: blur(8px);
+  z-index: 10;
+  white-space: nowrap;
 }
 
 .progress-bar {
@@ -172,28 +180,4 @@ model-viewer {
 
 .progress-bar.hide {
   display: none;
-}
-
-/* AR Surface Prompt */
-#arPrompt {
-  position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translateX(-50%);
-  display: none;
-}
-
-model-viewer[ar-status="session-started"] #arPrompt {
-  display: block;
-}
-
-.ar-scanning-pill {
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 30px;
-  font-size: 0.85rem;
-  letter-spacing: 0.03em;
-  border: 1px solid rgba(0, 240, 255, 0.4);
-  backdrop-filter: blur(8px);
 }
