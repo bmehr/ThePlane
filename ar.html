@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR View: Chrome Aircraft</title>
+
+  <!-- Only A-Frame is loaded on this page -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe-master.min.js"></script>
+
+  <style>
+    :root {
+      --accent-cyan: #00f0ff;
+      --bg-glass: rgba(18, 20, 26, 0.75);
+      --border-glass: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #ffffff;
+    }
+
+    a-scene {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .controls-bar {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.85rem;
+      z-index: 10;
+      width: calc(100% - 3rem);
+      max-width: 420px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.4rem;
+      border-radius: 9999px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+      user-select: none;
+      flex: 1;
+    }
+
+    .btn-exit {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(112, 0, 255, 0.3));
+      border: 1px solid var(--accent-cyan);
+    }
+
+    .gesture-hint {
+      position: absolute;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      pointer-events: none;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      z-index: 10;
+      text-align: center;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gesture-hint" id="statusHint">Move phone to scan floor, then tap to place</div>
+
+  <a-scene
+    id="scene"
+    webxr="optionalFeatures: hit-test, local-floor;"
+    ar-hit-test="target: #aircraftEntity; type: map;"
+    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true; alpha: true;"
+    vr-mode-ui="enabled: false"
+  >
+    <a-assets timeout="10000">
+      <a-asset-item id="aircraftModel" src="assets/aircraft_chrome.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera id="camera" position="0 1.6 0"></a-camera>
+
+    <a-entity light="type: ambient; intensity: 0.9;"></a-entity>
+    <a-entity light="type: directional; intensity: 1.6;" position="2 4 2"></a-entity>
+
+    <a-entity
+      id="aircraftEntity"
+      gltf-model="#aircraftModel"
+      position="0 0 -1.2"
+      scale="0.6 0.6 0.6"
+      visible="false"
+    >
+    </a-entity>
+  </a-scene>
+
+  <nav class="controls-bar">
+    <a href="index.html" class="btn btn-exit">
+      Exit AR
+    </a>
+  </nav>
+
+  <script>
+    const scene = document.getElementById('scene');
+    const aircraft = document.getElementById('aircraftEntity');
+    const statusHint = document.getElementById('statusHint');
+
+    // Automatically request AR session on page load
+    scene.addEventListener('loaded', async () => {
+      try {
+        if (typeof scene.enterAR === 'function') {
+          await scene.enterAR();
+        }
+      } catch (err) {
+        console.warn('Auto enterAR failed; user interaction may be required:', err);
+      }
+    });
+
+    scene.addEventListener('ar-hit-test-select', () => {
+      aircraft.setAttribute('visible', 'true');
+      statusHint.textContent = 'Sculpture placed! Walk around to inspect';
+    });
+  </script>
+</body>
+</html>

@@ -4,16 +4,179 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>LA Exhibit: Chrome Aircraft</title>
-  <link rel="stylesheet" href="style.css" />
 
   <link rel="preload" href="assets/dtla_skybox.hdr" as="fetch" type="image/vnd.radiance" crossorigin="anonymous">
   <link rel="preload" href="assets/aircraft_chrome.glb" as="fetch" type="model/gltf-binary" crossorigin="anonymous">
 
-  <!-- Core exhibit engine -->
+  <!-- Only model-viewer is loaded on the main page -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 
-  <!-- A-Frame Core -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe-master.min.js"></script>
+  <style>
+    :root {
+      --accent-cyan: #00f0ff;
+      --bg-glass: rgba(18, 20, 26, 0.75);
+      --border-glass: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b0c10;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #ffffff;
+    }
+
+    model-viewer {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      outline: none;
+    }
+
+    .header {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      color: #a0a5b5;
+      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+    }
+
+    .controls-bar {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.85rem;
+      z-index: 10;
+      width: calc(100% - 3rem);
+      max-width: 420px;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.4rem;
+      border-radius: 9999px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+      user-select: none;
+    }
+
+    .btn:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-ar {
+      flex: 2;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(112, 0, 255, 0.3));
+      border: 1px solid var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-shutter {
+      flex: 1;
+    }
+
+    .btn-shutter svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: var(--accent-cyan);
+      stroke-width: 2;
+    }
+
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.12s ease-out;
+    }
+
+    .flash-overlay.active {
+      opacity: 0.85;
+    }
+
+    .gesture-hint {
+      position: absolute;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(0, 0, 0, 0.55);
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      pointer-events: none;
+      letter-spacing: 0.03em;
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 20;
+    }
+
+    .progress-bar .fill {
+      width: 0%;
+      height: 100%;
+      background: var(--accent-cyan);
+      transition: width 0.1s linear;
+    }
+
+    .progress-bar.hide {
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -24,13 +187,12 @@
     <p>Downtown Los Angeles Exhibit</p>
   </header>
 
-  <div class="gesture-hint" id="statusHint">Drag to rotate • Pinch to zoom</div>
+  <div class="gesture-hint">Drag to rotate • Pinch to zoom</div>
 
   <div class="progress-bar" id="progressBar">
     <div class="fill" id="progressFill"></div>
   </div>
 
-  <!-- 1. 3D SKYBOX EXHIBIT -->
   <model-viewer
     id="aircraftViewer"
     src="assets/aircraft_chrome.glb"
@@ -53,38 +215,6 @@
   >
   </model-viewer>
 
-  <!-- 2. NATIVE WEBAR CAMERA SCENE -->
-  <a-scene
-    id="arScene"
-    class="ar-hidden"
-    embedded
-    webxr="optionalFeatures: hit-test, local-floor;"
-    ar-hit-test="target: #arAircraft; type: map;"
-    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true;"
-    vr-mode-ui="enabled: false"
-  >
-    <a-assets>
-      <a-asset-item id="arModel" src="assets/aircraft_chrome.glb"></a-asset-item>
-    </a-assets>
-
-    <a-camera id="arCamera" position="0 1.6 0"></a-camera>
-
-    <!-- Lighting for Real World Surface -->
-    <a-entity light="type: ambient; intensity: 0.9;"></a-entity>
-    <a-entity light="type: directional; intensity: 1.6;" position="2 4 2"></a-entity>
-
-    <!-- Model Entity placed on detected surface -->
-    <a-entity
-      id="arAircraft"
-      gltf-model="#arModel"
-      position="0 0 -1.5"
-      scale="0.8 0.8 0.8"
-      visible="false"
-    >
-    </a-entity>
-  </a-scene>
-
-  <!-- Controls Bar -->
   <nav class="controls-bar">
     <button class="btn btn-shutter" id="shutterBtn" aria-label="Take Snapshot">
       <svg viewBox="0 0 24 24">
@@ -93,11 +223,57 @@
       </svg>
       Snap
     </button>
-    <button class="btn btn-ar" id="arToggleBtn">
+    <a href="ar.html" class="btn btn-ar" id="arBtn">
       View in Space (AR)
-    </button>
+    </a>
   </nav>
 
-  <script src="app.js"></script>
+  <script>
+    const viewer = document.getElementById('aircraftViewer');
+    const shutterBtn = document.getElementById('shutterBtn');
+    const flash = document.getElementById('flash');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+
+    // Loading Bar
+    if (viewer) {
+      viewer.addEventListener('progress', (event) => {
+        const percentage = event.detail.totalProgress * 100;
+        if (progressFill) progressFill.style.width = `${percentage}%`;
+        if (percentage >= 100 && progressBar) {
+          setTimeout(() => progressBar.classList.add('hide'), 200);
+        }
+      });
+    }
+
+    // Viewport Screenshot
+    if (shutterBtn && viewer) {
+      shutterBtn.addEventListener('click', async () => {
+        if (flash) {
+          flash.classList.add('active');
+          setTimeout(() => flash.classList.remove('active'), 120);
+        }
+
+        try {
+          const blob = await viewer.toBlob({
+            mimeType: 'image/png',
+            idealAspect: true,
+            qualityArgument: 1.0
+          });
+
+          const downloadUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `Chrome_Aircraft_${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+        } catch (err) {
+          console.error('Snapshot failed:', err);
+        }
+      });
+    }
+  </script>
 </body>
 </html>
